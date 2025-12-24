@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+
+.card-box {
+    width: 90px;
+    height: 100px;
+    background-color: lightgray;
+    border: none;
+    margin: 5px;
+  }
+
+.card-box-flipped{
+    border-style: outset;
+    border-width: 5px;
+    border-color: gold;
+    border-radius: 2px;
+    padding: 4px;
+}

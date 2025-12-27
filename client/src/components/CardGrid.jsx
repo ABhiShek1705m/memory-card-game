@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Card from "./Card";
 import ImageContext from "../context/ImageContext";
 import RestartButton from "./RestartButton";
@@ -30,9 +30,9 @@ const CardGrid = () => {
             arr[i] = arr[j]
             arr[j] = temp
         }
-        return arr
     }
 
+    // Check for the wind condition
     useEffect(() => {
         //Check if all the cards are flipped?
         if(Object.keys(compareValues).length == 0){
@@ -50,11 +50,13 @@ const CardGrid = () => {
             //Check if all cards are flipped
             const allFlipped = allCards.length == 16 && allCards.every(card => card.classList.contains("card-box-flipped"))
             if(allFlipped){
-                const winnerText = document.createElement('h3')
+                const winnerText = document.createElement('h2')
                 winnerText.innerText = `You won, press restart to play again`
+                winnerText.className = "text-2xl font-bold text-white relative top-4 left-3"
                 const container = document.getElementById('grid-container')
                 container.appendChild(winnerText)
             }
+            // Store result into database, fetch call can be added here.ß
         }
     }, [compareValues])
 
@@ -128,7 +130,7 @@ const CardGrid = () => {
         cardRows.forEach((row) => {
             const cards = row.querySelectorAll(".card-box")
             cards.forEach((card) => {
-                console.log("****Card -->", card)
+                // console.log("****Card -->", card)
                 if(card.disabled){
                     card.disabled = false
                 }
@@ -141,7 +143,7 @@ const CardGrid = () => {
         const container = document.getElementById('grid-container')
         //if the winner text exists, then remove it when the game is restarted
         const lastEl = container.lastElementChild
-        if(lastEl && lastEl.tagName === "H3") {
+        if(lastEl && lastEl.tagName === "H2" || lastEl.tagName ==="h3") {
             container.removeChild(container.lastChild)
         }
         //Also shuffle the array once more
@@ -149,9 +151,33 @@ const CardGrid = () => {
         setShuffledArray(shuffledArray)
     }
 
+    const handleDevModeClick = () => {
+        const cardRows = document.querySelectorAll(".row")
+        // Flip all cards to show their values
+        let i = 0;
+        cardRows.forEach((row) => {
+            const cards = row.querySelectorAll(".card-box")
+            cards.forEach((card) => {
+                // console.log("****Card -->", card)
+                card.disabled = true
+                card.classList.add("card-box-flipped")
+                card.innerText = `Card ${shuffledArray[i++]} flipped`
+            })
+        })
+        setcompareValues({}) // This is to trigger useEffect for win condition
+    }
+
     return(
         <>
-        <div id="information-text" className="absolute top-[35vh] left-[8vw]">
+        <button className="bg-red-500 hover:bg-red-600 active:bg-red-900 
+                active:outline-2 active: outline-offset-1 p-3 shadow-lg text-xl 
+                text-yellow-500 font-bold absolute left-[57vw] top-[12vh] 
+                border-yellow-300 border-2 rounded-full"
+                onClick={handleDevModeClick}>
+            Dev Mode (flip all cards)
+        </button>
+        <RestartButton onbuttonClick={handleRestartBtnClick} />
+        <div id="information-text" className="absolute top-[15vh] left-[8vw]">
             <label htmlFor="turn-count" className="font-bold text-white">Number of turns</label><br />
             <input 
             id="turn-count" 
@@ -159,9 +185,7 @@ const CardGrid = () => {
             className="p-1 bg-white rounded-sm border-2 border-solid border-black z-10" 
             value={turnNumber} />
         </div>
-        
-        <RestartButton onbuttonClick={handleRestartBtnClick} />
-        <div className="relative left-[1vw] top-[24vh]" id="grid-container">
+        <div className="absolute left-[34vw] top-52" id="grid-container">
             <div className="row">
                 <Card id={1} value={shuffledArray[0]}  onsquareclick={handleClick} />
                 <Card id={2} value={shuffledArray[1]}  onsquareclick={handleClick} />

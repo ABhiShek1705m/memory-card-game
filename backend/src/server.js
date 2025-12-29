@@ -1,7 +1,7 @@
 import express from "express"
 import cors from "cors"
 import sqlite3 from "sqlite3"
-import { execute, query } from "./sql.js"
+import { execute } from "./sql.js"
 
 const app = express()
 
@@ -39,7 +39,7 @@ const createPlayerTable = async() => {
     }
 }
 
-// Initialize the database
+// Create the player_highscores table
 createPlayerTable();
 
 // Paths for handling highscores
@@ -52,13 +52,19 @@ app.use("/save-score", async (req, res, next) => {
     }
 
     try {
-        const result = await query(db, "SELECT MAX(score) as highscore FROM player_highscores WHERE player_name = ?", [playerName]);
-        const currentHigh = result[0]?.highscore || 0;
-        
-        if (score > currentHigh) {
-            next();
+        const result = await execute(db, "SELECT MAX(score) as highscore FROM player_highscores WHERE player_name = ?", [playerName]);
+        const currentHighscore = result[0].highscore;
+
+        // Insert new entry if no previous highscore exists
+        if(currentHighscore == null){
+            const result = await execute(db, "INSERT INTO player_highscores (player_name, score, date_achieved) VALUES (?, ?, ?)", [playerName, score, new Date().toISOString()]);
         } else {
-            res.json({ message: "Score not higher than current highscore" });
+            //Need to update highscore
+            if(score > currentHighscore){
+                next();
+            } else {
+                return res.json({ message: "Score not higher than current highscore" });
+            }
         }
     } catch (error) {
         console.error("Database error:", error);
@@ -66,12 +72,13 @@ app.use("/save-score", async (req, res, next) => {
     }
 });
 
+// Update db with new highscore
 app.put("/save-score", async (req, res) => {
     const { playerName, score } = req.body;
     const date = new Date().toISOString();
     
     try {
-        await execute(db, "INSERT INTO player_highscores (player_name, score, date_achieved) VALUES (?, ?, ?)", [playerName, score, date]);
+        await execute(db, "UPDATE player_highscores SET score = ?, date_achieved = ? WHERE player_name = ?", [score, date, playerName]);
         res.json({ message: "Highscore saved successfully" });
     } catch (error) {
         console.error("Failed to save score:", error);
@@ -81,7 +88,7 @@ app.put("/save-score", async (req, res) => {
 
 app.get("/highscores", async (req, res) => {
     try {
-        const result = await query(db, "SELECT * FROM player_highscores ORDER BY score ASC");
+        const result = await execute(db, "SELECT * FROM player_highscores ORDER BY score ASC");
         res.json(result);
     } catch (error) {
         console.error("Failed to fetch highscores:", error);
@@ -98,7 +105,7 @@ app.get("/highscores/:name", async (req, res) => {
     }
 
     try {
-        const result = await query(db, "SELECT * FROM player_highscores WHERE player_name LIKE ? ORDER BY score ASC", [`%${name}%`]);
+        const result = await execute(db, "SELECT * FROM player_highscores WHERE player_name LIKE ? ORDER BY score ASC", [`%${name}%`]);
         res.json(result);
     } catch (error) {
         console.error("Failed to search highscores:", error);

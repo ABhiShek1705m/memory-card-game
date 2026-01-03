@@ -8,9 +8,10 @@ import RestartButton from "./RestartButton";
 
 
 const CardGrid = () => {
+    // Might use images instead of numbers.
     const images = useContext(ImageContext)
     //for now taking images as numbers
-    
+    const [playerName, setPlayerName] = useState(null);
     const[shuffledArray, setShuffledArray] = useState([])
     const[compareValues, setcompareValues] = useState({})
     const[turnNumber, setturnNumber] = useState(0)
@@ -20,6 +21,10 @@ const CardGrid = () => {
         let newArray = [...numbers, ...numbers]
         shuffleArray(newArray)
         setShuffledArray(newArray)
+        // Also set the player name here
+        if(typeof window !== 'undefined'){
+            setPlayerName(window.localStorage.getItem("playerName"));
+        }
     }, [])
 
     function shuffleArray(arr){
@@ -32,7 +37,31 @@ const CardGrid = () => {
         }
     }
 
-    // Check for the wind condition
+    const storeResult = async (score, playerName) => {
+        if (!playerName) {
+            console.error("Player name is not set. Cannot save score.");
+            return;
+        }
+        // Use local express server for now
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
+        try{
+            const result = await fetch(`${baseUrl}/save-score`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ playerName, score })
+            })
+            const data = await result.json()
+            console.log("Score is saved -->", data)
+        } catch(error){
+            console.error("Error saving score -->", error)
+            alert("Error saving score to the database. Please try again later.")
+        }
+    }
+
+
+    // Check for the win condition
     useEffect(() => {
         //Check if all the cards are flipped?
         if(Object.keys(compareValues).length == 0){
@@ -55,8 +84,9 @@ const CardGrid = () => {
                 winnerText.className = "text-2xl font-bold text-white relative top-4 left-3"
                 const container = document.getElementById('grid-container')
                 container.appendChild(winnerText)
+                // Store result into database, fetch call can be added here.
+                storeResult(turnNumber, playerName);
             }
-            // Store result into database, fetch call can be added here.ß
         }
     }, [compareValues])
 
@@ -183,7 +213,8 @@ const CardGrid = () => {
             id="turn-count" 
             type="text" 
             className="p-1 bg-white rounded-sm border-2 border-solid border-black z-10" 
-            value={turnNumber} />
+            value={turnNumber}
+            readOnly />
         </div>
         <div className="absolute left-[34vw] top-52" id="grid-container">
             <div className="row">

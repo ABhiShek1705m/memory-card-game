@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Memory Card Game
 
-## Getting Started
+This repository contains a memory game where players have to turn matching cards by flipping the cards the lowest number of times. This is built on a **Next.js App Router frontend** and an **Express + SQLite backend** for persisting highscores.
 
-First, run the development server:
+## Project Overview
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Next.js frontend** (located under `client/src/app`) renders the home screen, game board, and leaderboard using React hooks, client components, and shared styles. `CardGrid` handles shuffling cards, tracking turns, detecting wins, and posting results to the backend when a session finishes.
+- **Leaderboard page** (`/leaderboard`) fetches `/highscores` from the backend and renders a dynamic table with one row per persisted score, showing player name, score, and timestamp.
+- **Express + SQLite backend** (in `backend/src`) exposes `/save-score` and `/highscores`. Scores are stored in `memory_game.db`, and the routes enforce one record per player by updating only when a new result beats the existing best.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Technology Stack
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+| Layer | Technology |
+| --- | --- |
+| Frontend | Next.js 14 App Router, React hooks, client/server components, Tailwind-inspired utility classes |
+| Backend | Express.js, SQLite (via `sqlite3`), helper wrappers in `sql.js` |
+| Data | `player_highscores` table with player name, score, and formatted timestamp |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Local Development
 
-## Learn More
+1. **Install dependencies**
+	```bash
+	cd client
+	npm install
+	cd ../backend
+	npm install
+	```
+2. **Start the backend** (runs on port 3001)
+	```bash
+	npm start
+	```
+3. **Start the Next.js frontend**
+	```bash
+	cd ../client
+	npm run dev
+	```
+4. **Play the game**
+	- Go to `http://localhost:3000`.
+	- Finishing a game or using DevMode triggers `PUT /save-score` to store the turn count for the current player.
+	- Open `/leaderboard` to view the ranked results pulled from SQLite.
 
-To learn more about Next.js, take a look at the following resources:
+## Notes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Set `NEXT_PUBLIC_BACKEND_URL` when the frontend needs to call a deployed backend.
+- The backend formats timestamps as `Date(YYYY/MM/DD) - Time(HH:MM:SS)` before saving them.

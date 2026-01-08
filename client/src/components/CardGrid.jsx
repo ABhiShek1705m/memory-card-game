@@ -2,15 +2,11 @@
 
 import { useContext, useEffect, useState } from "react";
 import Card from "./Card";
-import ImageContext from "../context/ImageContext";
 import RestartButton from "./RestartButton";
 
 
-
+// Creating a number grid and shuffling them for the game.
 const CardGrid = () => {
-    // Might use images instead of numbers.
-    const images = useContext(ImageContext)
-    //for now taking images as numbers
     const [playerName, setPlayerName] = useState(null);
     const[shuffledArray, setShuffledArray] = useState([])
     const[compareValues, setcompareValues] = useState({})
@@ -199,10 +195,11 @@ const CardGrid = () => {
 
     return(
         <>
-        <button className="bg-red-500 hover:bg-red-600 active:bg-red-900 
-                active:outline-2 active: outline-offset-1 p-3 shadow-lg text-xl 
-                text-yellow-500 font-bold absolute left-[57vw] top-[12vh] 
-                border-yellow-300 border-2 rounded-full"
+        <button className="ui-nav-btn bg-red-500 hover:bg-red-600 active:bg-red-900 
+                p-3 shadow-lg text-xl 
+                text-yellow-100 font-bold absolute left-[57vw] top-[12vh] 
+                border-yellow-300 border-2 rounded-full hidden
+                focus:outline-2 focus:outline-offset-2 focus:outline-yellow-300"  // Hiding the dev mode button, only show when needed.
                 onClick={handleDevModeClick}>
             Dev Mode (flip all cards)
         </button>

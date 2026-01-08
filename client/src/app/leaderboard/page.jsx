@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import NavBar from "../../components/NavBar";
+import Link from 'next/link';
 
 export default function leaderboardPage() {
     const [highscores, setHighscores] = useState([]);
+    const[name, setPlayerName] = useState("");
 
     useEffect(() => {
         const fetchHighscores = async () => {
@@ -23,9 +24,32 @@ export default function leaderboardPage() {
         fetchHighscores();
     }, [])
 
+    async function searchResults(key){
+        if(key !== "Enter") return;
+
+        try{
+            const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3001";
+            const response = await fetch(`${baseUrl}/highscores/${name}`, { method: "GET" })
+            if(!response.ok) throw new Error (`Error occured status: ${response.status}`)
+            const data = await response.json()
+            if(data) console.log("Player fetched:", data)
+            else console.log("No player found with that name")
+            setHighscores(data)
+        } catch (error){
+            console.error(`Error finding player in the database: ${error}`)
+        }
+    }
+
     return (
         <>
-        <NavBar />
+        <div className="absolute top-6 left-6 z-20">
+            <Link
+                href="/play"
+                className="ui-nav-btn bg-amber-100 text-amber-900 border-2 border-yellow-700 inline-block"
+            >
+                ← Back to Game
+            </Link>
+        </div>
         <div className="grid place-items-center text-5xl font-bold text-yellow-300 mb-10">
             Highest Scorers
         </div>
@@ -61,6 +85,12 @@ export default function leaderboardPage() {
                 </table>
             </div>
         </div>
+        {/* Search bar for searching highscores by name */}
+        <label htmlFor="search-input" className="font-bold text-yellow-300 text-xl inline relative left-20">Search player by name</label>
+        <input type="text" id="search-input" onKeyUp={(e) => searchResults(e.key)} 
+        className="bg-amber-50 outline-2 block rounded-[5px] p-0.5 relative left-20"
+        value={name} onChange={(e) => setPlayerName(e.target.value)} placeholder='Player name' />
+
         </>
     )
 }

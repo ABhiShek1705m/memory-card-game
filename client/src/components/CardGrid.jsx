@@ -52,7 +52,7 @@ const CardGrid = () => {
             console.log("Score is saved -->", data)
         } catch(error){
             console.error("Error saving score -->", error)
-            alert("Error saving score to the database. Please try again later.")
+            alert("Error saving score to the database.")
         }
     }
 

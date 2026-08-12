@@ -39,7 +39,9 @@ This repository contains a memory game where players have to turn matching cards
 	- Finishing a game or using DevMode triggers `PUT /save-score` to store the turn count for the current player.
 	- Open `/leaderboard` to view the ranked results pulled from SQLite.
 
-## Notes
+## See deployed frontend
+[Memory Card Game](memory-card-game-liard-iota.vercel.app)
 
+## Notes
 - Set `NEXT_PUBLIC_BACKEND_URL` when the frontend needs to call a deployed backend.
 - The backend formats timestamps as `Date(YYYY/MM/DD) - Time(HH:MM:SS)` before saving them.

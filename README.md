@@ -1,6 +1,6 @@
 # Memory Card Game
 
-This repository contains a memory game where players have to turn matching cards by flipping the cards the lowest number of times. This is built on a **Next.js App Router frontend** and an **Express + SQLite backend** for persisting highscores.
+This is a card-based memory game where players have to memorize and turn matching cards correctly and flip the entire grid in the lowest number of turns. This is built on a **Next.js (App Router)** and an **Express + SQLite backend** for tracking and persisting user highscores data.
 
 ## Project Overview
 
